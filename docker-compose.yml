@@ -1,0 +1,43 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: swiggy-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: swiggyCloneDB
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--username", "admin", "--password", "password", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: swiggy-backend
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      SPRING_MONGODB_URI: mongodb://admin:password@mongodb:27017/swiggyCloneDB?authSource=admin
+
+  redis:
+    image: redis:7
+    container_name: swiggy-redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+
+volumes:
+  mongo_data:

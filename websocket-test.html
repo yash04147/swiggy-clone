@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Order WebSocket Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+</head>
+<body>
+
+<h2>WebSocket Order Tracker</h2>
+
+<input type="text" id="orderId" placeholder="Enter Order ID" />
+<button onclick="connect()">Connect</button>
+
+<h3>Updates:</h3>
+<ul id="updates"></ul>
+
+<script>
+    let stompClient = null;
+
+    function connect() {
+        const orderId = document.getElementById("orderId").value;
+
+        const socket = new SockJS("http://localhost:8080/ws");
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            console.log("Connected: " + frame);
+
+            stompClient.subscribe("/topic/orders/" + orderId, function (message) {
+                const data = JSON.parse(message.body);
+
+                const li = document.createElement("li");
+                li.innerText = "Order " + data.orderId + " → " + data.status;
+
+                document.getElementById("updates").appendChild(li);
+            });
+        });
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+spring:
+  mongodb:
+    uri: ${SPRING_MONGODB_URI:mongodb://admin:password@localhost:27017/swiggyCloneDB?authSource=admin}
+    auto-index-creation: true
+
+  cache:
+    type: redis
+
+  data:
+    redis:
+      host: redis
+      port: 6379
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
