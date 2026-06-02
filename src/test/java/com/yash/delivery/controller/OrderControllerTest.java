@@ -1,6 +1,7 @@
 package com.yash.delivery.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yash.delivery.security.JwtAuthenticationFilter;
 import com.yash.delivery.security.JwtUtil;
 import com.yash.delivery.security.SecurityConfig;
 import com.yash.delivery.service.OrderService;
@@ -31,6 +32,9 @@ public class OrderControllerTest {
 
     @MockitoBean
     private CacheManager cacheManager;
+
+    @MockitoBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Test
     void placeOrder_shouldReturn401_whenNoTokenProvided() throws Exception {
