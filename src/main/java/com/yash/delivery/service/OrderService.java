@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Metrics;
 import org.springframework.data.geo.Point;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -29,6 +31,9 @@ public class OrderService {
     private final UserRepository userRepository;
     private final DeliveryPartnerRepository deliveryPartnerRepository;
     private final SimpMessagingTemplate messagingTemplate;
+
+    private static final Logger log =
+            LoggerFactory.getLogger(OrderService.class);
 
     // Place order, only by a customer
     public OrderResponse placeOrder(Order order){
@@ -288,16 +293,20 @@ public class OrderService {
     // 🚴 Auto assign nearest available delivery partner
     private void autoAssignDeliveryPartner(Order order) {
 
-        System.out.println("AUTO ASSIGN STARTED");
+        log.info("Auto assignment started");
 
         Restaurant restaurant = restaurantRepository.findById(order.getRestaurantId())
                 .orElseThrow(() -> new ApiException("Restaurant not found"));
 
-        System.out.println("Restaurant found");
+        log.info("Restaurant found for order {}", order.getId());
 
         Double[] coordinates = restaurant.getLocation().getCoordinates();
 
-        System.out.println("Coordinates: " + Arrays.toString(coordinates));
+        log.info(
+                "Restaurant location -> longitude: {}, latitude: {}",
+                coordinates[0],
+                coordinates[1]
+        );
 
         Point point = new Point(coordinates[0], coordinates[1]);
 
@@ -307,7 +316,7 @@ public class OrderService {
                         new Distance(5, Metrics.KILOMETERS)
                 );
 
-        System.out.println("Nearby partners found: " + nearbyPartners.size());
+        log.info("Nearby partners found: {}", nearbyPartners.size());
 
         // nearest partner = first result
         DeliveryPartner partner = nearbyPartners.getFirst();
@@ -329,7 +338,7 @@ public class OrderService {
 
         String destination = "/topic/orders/" + order.getId();
 
-        System.out.println("Sending WS update for order: " + order.getId());
+        log.info("Sending WS update for order: {}", order.getId());
 
         messagingTemplate.convertAndSend(destination, (Object) Map.of(
                 "orderId", order.getId(),

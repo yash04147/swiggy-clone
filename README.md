@@ -12,7 +12,16 @@ Customer places order
 ```
 
 ---
+## Tech Stack
 
+- Java 21
+- Spring Boot
+- Spring Security
+- MongoDB
+- Redis
+- Docker
+- GitHub Actions
+---
 # Features
 
 ## Authentication & Authorization
@@ -54,20 +63,6 @@ Customer places order
 * Global exception handling
 * MongoDB geospatial query support
 * Docker Compose setup
-
----
-
-# Tech Stack
-
-* Java 21
-* Spring Boot
-* Spring Security
-* JWT
-* MongoDB
-* Spring Data MongoDB
-* Docker & Docker Compose
-* Swagger / OpenAPI
-* Lombok
 
 ---
 

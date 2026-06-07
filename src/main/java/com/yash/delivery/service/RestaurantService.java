@@ -15,6 +15,8 @@ import org.springframework.data.geo.Metrics;
 import org.springframework.data.geo.Point;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -24,6 +26,9 @@ public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
     private final UserRepository userRepository;
+
+    private static final Logger log =
+            LoggerFactory.getLogger(OrderService.class);
 
     // Create restaurant (OWNER only)
     @CacheEvict(value = "open-restaurants", allEntries = true)
@@ -68,6 +73,7 @@ public class RestaurantService {
                 .getAuthentication()
                 .getPrincipal();
 
+        log.info("Fetching restaurants owned by user : {}",userId);
         return restaurantRepository.findByOwnerId(userId);
     }
 
@@ -75,7 +81,7 @@ public class RestaurantService {
     @Cacheable("open-restaurants")
     public List<RestaurantResponse> getOpenRestaurants(){
 
-        System.out.println("FETCHING FROM MONGODB");
+        log.info("Fetching from DB instead of cache");
         return restaurantRepository.findByIsOpenTrue()
                 .stream()
                 .map(this::mapToRestaurantResponse)

@@ -56,7 +56,8 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/api/restaurants",
                                 "/api/restaurants/nearby",
-                                "/ws/**"
+                                "/ws/**",
+                                "/actuator/**"
                         ).permitAll()  // PUBLIC endpoint
                         .anyRequest().authenticated()            // Everything else secured
                 )
