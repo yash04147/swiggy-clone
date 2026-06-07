@@ -30,3 +30,7 @@ management:
 logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%X{correlationId}] %-5level %logger{36} - %msg%n"
+
+jwt:
+  secret: ${JWT_SECRET:my-super-secret-key-my-super-secret-key}
+  expiration: ${JWT_EXPIRATION:86400000}

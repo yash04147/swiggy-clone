@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -11,16 +13,16 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    // ⚠️ In production, NEVER hardcode secret
-    private static final String SECRET =
-            "my-super-secret-key-my-super-secret-key";
+    @Value("${jwt.secret}")
+    private String secret;
 
-    private final SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes());
+    private SecretKey key;
 
-    // Token validity: 24 hours
-    private static final long EXPIRATION_MS = 1000 * 60 * 60 * 24;
+    // Token validity:
+    @Value("${jwt.expiration}")
+    private long expirationMs;
 
-    // 🔑 Generate token
+    // Generate token
     public String generateToken(String userId, String email, String role) {
 
         return Jwts.builder()
@@ -28,12 +30,12 @@ public class JwtUtil {
                 .claim("email", email)
                 .claim("role", role)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_MS))
+                .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(key)
                 .compact();
     }
 
-    // 📖 Extract claims
+    // Extract claims
     public Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith(key)
@@ -42,20 +44,25 @@ public class JwtUtil {
                 .getPayload();
     }
 
-    // 🆔 Extract user ID
+    // Extract user ID
     public String extractUserId(String token) {
         return extractAllClaims(token).getSubject();
     }
 
-    // ⏰ Check expiration
+    // Check expiration
     public boolean isTokenExpired(String token) {
         return extractAllClaims(token)
                 .getExpiration()
                 .before(new Date());
     }
 
-    // ✅ Validate token
+    // Validate token
     public boolean isTokenValid(String token) {
         return !isTokenExpired(token);
+    }
+
+    @PostConstruct
+    public void init() {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes());
     }
 }
